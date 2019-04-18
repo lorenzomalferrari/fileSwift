@@ -22,12 +22,16 @@ class ViewController: UIViewController, WKNavigationDelegate {
             self.urlStr = address.replacingOccurrences (of: "\\/", with: "/")
             print("Address postReplace -> " + self.urlStr)
             
-            let url = URL(string: a)! //Here is the error -> Fatal error: Unexpectedly found nil while unwrapping an Optional value
-            self.webView.load(URLRequest(url: url))
-            // 2
-            let refresh = UIBarButtonItem(barButtonSystemItem: .refresh, target: self.webView, action: #selector(self.webView.reload))
-            self.toolbarItems = [refresh]
-            self.navigationController?.isToolbarHidden = true
+            let url = URL(string: self.urlStr)! //Here is the error -> Fatal error: Unexpectedly found nil while unwrapping an Optional value
+            
+            // This code must run on the main thread because it interacts with the UI.
+            DispatchQueue.main.async {
+                self.webView.load(URLRequest(url: url))
+                // 2
+                let refresh = UIBarButtonItem(barButtonSystemItem: .refresh, target: self.webView, action: #selector(self.webView.reload))
+                self.toolbarItems = [refresh]
+                self.navigationController?.isToolbarHidden = true
+            }
         }
         
     }
@@ -37,14 +41,13 @@ class ViewController: UIViewController, WKNavigationDelegate {
         webView.navigationDelegate = self
         view = webView
     }
-
+    
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) { title = webView.title }
     
     func risolutoreIndirizzo(completion: @escaping (_ result: String) -> Void) {
-        var indirizzoPortaleString:String = ""
         
-        let indirizzoPortale:String = "https://mywebsite.com/"
-        let percorsoPortale:String = "privateProject/file.php"
+        let indirizzoPortale:String = "https://example.com/"
+        let percorsoPortale:String = ""
         print("URL -> \(indirizzoPortale+percorsoPortale)")
         let request = NSMutableURLRequest(url: NSURL(string: indirizzoPortale+percorsoPortale)! as URL)
         request.httpMethod = "POST"
@@ -72,8 +75,15 @@ class ViewController: UIViewController, WKNavigationDelegate {
             
             //print(arrayResponse[0])
             
-            indirizzoPortaleString = arrayResponse[0].split(separator: ":")[1] + ":" + arrayResponse[0].split(separator: ":")[2]
-            print("Indirizzo al quale accedere -> " + indirizzoPortaleString)
+            // This variable must be declared inside the block.
+            var indirizzoPortaleString: String = ""
+            
+            // Since I'm not getting any real data, I'm replacing it with the ones you sent me earlier. You don't have to do this.
+            // indirizzoPortaleString = arrayResponse[0].split(separator: ":")[1] + ":" + arrayResponse[0].split(separator: ":")[2]
+            // print("Indirizzo al quale accedere -> " + indirizzoPortaleString)
+            
+            // I'm imitating getting an address from your real site.
+            indirizzoPortaleString = #"https:\/\/www.mywebsite.com\/privateProject\/file.php"#
             
             completion(indirizzoPortaleString)
         }
